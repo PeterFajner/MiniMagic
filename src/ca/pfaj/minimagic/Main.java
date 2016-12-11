@@ -12,6 +12,8 @@ public class Main extends JavaPlugin
 	public static boolean DEBUG = true;
 	public static PluginLogger logger;
 	
+	static int FIREBALL_COST = 50;
+	
 	public Server server;
 	
 	@Override
@@ -23,7 +25,7 @@ public class Main extends JavaPlugin
 		debug("Debug printing enabled.");
 		
 		Wand.init(this); // register wand object and recipes
-		SpellFireball.init(this); // register fireball spell
+		SpellFireball.init(this, FIREBALL_COST); // register fireball spell
 	}
 	
 	@Override

@@ -39,11 +39,12 @@ public class SpellFireball
 	
 	public static ItemStack fireballWand;
 	public static String IDENTIFIER = "Fireball";
-	public static int COST = 50;
+	public static int COST;
 	
-	public static void init(Plugin plugin)
+	public static void init(Plugin plugin, int cost)
 	{
 		Server server = plugin.getServer();
+		SpellFireball.COST = cost;
 		
 		// create fireball wand item
 		fireballWand = new ItemStack(Material.STICK);
