@@ -40,8 +40,6 @@ public class SpellFireball
 	public static ItemStack fireballWand;
 	public static String IDENTIFIER = "Fireball";
 	public static int COST = 50;
-	public static short DURABILITY_INITIAL = 25;
-	public static short DURABILITY_COST = 1;
 	
 	public static void init(Plugin plugin)
 	{
