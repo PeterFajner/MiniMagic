@@ -12,7 +12,7 @@ public class Main extends JavaPlugin
 	public static boolean DEBUG = true;
 	public static PluginLogger logger;
 	
-	static int FIREBALL_COST = 50;
+	static int FIREBALL_COST = 15;
 	
 	public Server server;
 	
