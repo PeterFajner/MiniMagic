@@ -1,0 +1,5 @@
+main: ca.pfaj.minimagic.Main
+name: MiniMagic
+version: 0.1
+author: Peter Fajner
+description: A balanced magic system.

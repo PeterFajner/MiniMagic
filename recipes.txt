@@ -1,0 +1,5 @@
+Wand:
+	Shapeless 1 x Stick, 1 x Diamond, 2 x XP bottle
+
+Fireball wand:
+	Shapeless: 1 x Wand, 3 x Fire charge

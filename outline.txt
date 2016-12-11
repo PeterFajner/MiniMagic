@@ -1,0 +1,30 @@
+Spells:
+- Spells will be cast with wands.
+- Wands are crafted using diamonds, XP bottles, and a stick.
+- The generic wand is converted into a spell wand by crafting it with a magic book.
+- The magic book has the name of the desired spell written in it.
+- Wands decrease in durability when used.
+
+Potions:
+- brewed just like other potions
+
+Blocks:
+- Crafted just like other blocks, usually with added experience bottles
+
+Leveling (future):
+- wands, potions, and blocks can be leveled
+
+Armour (future):
+- Spells against other players are enhanced if the other player is wearing metal or diamond armour.
+- Spells against other players are reduced if the other player is wearing leather armour.
+- If the caster is wearing leather armour, their spell is reduced.
+- If the caster is wearing metal or diamond armour, their spell is reduced and has a chance of turning on them.
+- Leather armour can be enchanted to negate the caster penalty, the same enchantment also negates the defense bonus.
+
+Experience Goals:
+- mages are balanced to melee warriors on average
+- magic does not totally replace any Minecraft tools or weapons
+
+Structural Goals:
+- as few commands as possible
+- no permissions
