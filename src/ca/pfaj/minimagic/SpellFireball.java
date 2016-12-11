@@ -48,7 +48,8 @@ public class SpellFireball
 		// create fireball wand item
 		fireballWand = new ItemStack(Material.STICK);
 		ArrayList<String> lore = new ArrayList<String>();
-		lore.add(IDENTIFIER + ", Cost: " + COST);
+		lore.add(IDENTIFIER);
+		lore.add("Cost: " + COST);
 		ItemMeta fireballWandMeta = fireballWand.getItemMeta();
 		fireballWandMeta.setLore(lore);
 		fireballWandMeta.setDisplayName(IDENTIFIER);
