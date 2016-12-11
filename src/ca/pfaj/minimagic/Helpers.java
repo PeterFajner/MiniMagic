@@ -2,6 +2,7 @@ package ca.pfaj.minimagic;
 
 import java.util.List;
 
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -46,5 +47,22 @@ public class Helpers {
 	public static boolean loreContains(ItemStack item, String str)
 	{
 		return loreContains(item, str, false);
+	}
+	
+	/**
+	 * Attempts to deduct a positive amount of EXP from a player.
+	 * @param player The player to deduct from.
+	 * @param amount The amount of EXP to deduct.
+	 * @return True if amount successfully deducted, false if amount not deducted because it exceed's the player's total EXP.
+	 */
+	public static boolean deductEXP(Player player, int amount)
+	{
+		if (amount < 0) throw new IllegalArgumentException("amount cannot be negative");
+		int xp = Experience.getExp(player);
+		if (xp >= amount) {
+			Experience.changeExp(player, -amount);
+			return true;
+		}
+		else return false;
 	}
 }

@@ -4,9 +4,13 @@ import java.util.ArrayList;
 
 import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
@@ -20,8 +24,9 @@ import org.bukkit.plugin.Plugin;
  * - create fireball wand and recipe
  * - - create spell effect
  * - - register action
+ * - - deduct XP
+ * - - deduct durability
  * - create fireball spell
- * - - create XP deductor method
  */
 
 /**
@@ -29,10 +34,14 @@ import org.bukkit.plugin.Plugin;
  * @author peter
  *
  */
-public class Fireball
+public class SpellFireball
 {
 	
 	public static ItemStack fireballWand;
+	public static String IDENTIFIER = "Fireball";
+	public static int COST = 50;
+	public static short DURABILITY_INITIAL = 25;
+	public static short DURABILITY_COST = 1;
 	
 	public static void init(Plugin plugin)
 	{
@@ -40,11 +49,12 @@ public class Fireball
 		
 		// create fireball wand item
 		fireballWand = new ItemStack(Material.STICK);
+		fireballWand.setDurability(DURABILITY_INITIAL);
 		ArrayList<String> lore = new ArrayList<String>();
-		lore.add("Fireball Level I");
+		lore.add(IDENTIFIER + " Level I");
 		ItemMeta fireballWandMeta = fireballWand.getItemMeta();
 		fireballWandMeta.setLore(lore);
-		fireballWandMeta.setDisplayName("Fireball");
+		fireballWandMeta.setDisplayName(IDENTIFIER);
 		fireballWand.setItemMeta(fireballWandMeta);
 		
 		// create fireball wand recipe
@@ -62,9 +72,7 @@ public class Fireball
 }
 
 class FireballListener implements Listener
-{
-	FireballListener() {}
-	
+{	
 	@EventHandler
 	public void onItemCrafted(PrepareItemCraftEvent event)
 	/**
@@ -89,8 +97,30 @@ class FireballListener implements Listener
 				}
 			}
 			if (wand_in_ingredients && number_of_fire_charges == 3) {
-				inventory.setResult(Fireball.fireballWand);
+				inventory.setResult(SpellFireball.fireballWand);
 			}
 		}
+	}
+	
+	@EventHandler
+	/**
+	 * Handles firing the fireball when clicking with the wand.
+	 */
+	public void ballFiring(PlayerInteractEvent e) {
+	    Player p = e.getPlayer();
+	    Action a = e.getAction();
+	    ItemStack item = e.getItem();
+	    if (a != Action.PHYSICAL) { // the action is clicking something rather than stepping somewhere
+	    	if (Helpers.loreContains(item, SpellFireball.IDENTIFIER)) { // the item held is a fireball wand
+	    		if (Helpers.deductEXP(p, SpellFireball.COST)) {
+	    			Main.debug("Pew!");
+		            p.launchProjectile(Fireball.class);
+	    		}
+	    		else {
+	    			p.sendMessage("Insufficient EXP!");
+	    		}
+    			Main.debug("EXP: " + Experience.getExp(p));
+	    	}
+	    }
 	}
 }

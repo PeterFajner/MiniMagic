@@ -23,7 +23,7 @@ public class Main extends JavaPlugin
 		debug("Debug printing enabled.");
 		
 		Wand.init(this); // register wand object and recipes
-		Fireball.init(this); // register fireball spell
+		SpellFireball.init(this); // register fireball spell
 	}
 	
 	@Override
