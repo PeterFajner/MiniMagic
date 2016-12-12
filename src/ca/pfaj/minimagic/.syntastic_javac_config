@@ -1,0 +1,1 @@
+let g:syntastic_java_javac_classpath = '/home/riley/Documents/prgms/java/peterPlugins/spigot/Spigot/Spigot-API/target/spigot-api-1.11-R0.1-SNAPSHOT-shaded.jar:/home/riley/Documents/prgms/java/peterPlugins/MiniMagic/bin'

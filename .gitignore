@@ -19,3 +19,8 @@ hs_err_pid*
 .externalToolBuilders/
 bin/
 target/
+
+#erroneous local files
+SRC
+test
+build.xml
