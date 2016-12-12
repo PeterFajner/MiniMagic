@@ -24,3 +24,4 @@ target/
 SRC
 test
 build.xml
+.syntastic_javac_config
