@@ -3,6 +3,7 @@ package ca.pfaj.minimagic;
 import java.util.logging.Level;
 
 import org.bukkit.Server;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,27 +13,33 @@ public class Main extends JavaPlugin
 	public static boolean DEBUG = true;
 	public static PluginLogger logger;
 	
-	static int FIREBALL_COST = 15;
+	FileConfiguration config = getConfig();	
+	public Server server = getServer();
 	
-	public Server server;
+	public static void debug(String msg)
+	{
+		if (DEBUG) logger.log(Level.INFO, msg);
+	}
 	
 	@Override
 	public void onEnable()
 	{
-		this.server = getServer();
 		if (logger == null) logger = new PluginLogger(this);
+		createConfigDefaults();
 		
 		debug("Debug printing enabled.");
 		
 		Wand.init(this); // register wand object and recipes
-		SpellFireball.init(this, FIREBALL_COST); // register fireball spell
+		SpellFireball.init(this, config.getInt("fireball-cost")); // register fireball spell
 	}
 	
 	@Override
 	public void onDisable() {}
 	
-	public static void debug(String msg)
+	void createConfigDefaults()
 	{
-		if (DEBUG) logger.log(Level.INFO, msg);
+		config.addDefault("fireball-cost", 15);
+	    config.options().copyDefaults(true);
+	    saveConfig();
 	}
 }
