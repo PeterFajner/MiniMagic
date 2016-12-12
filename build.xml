@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="MiniMagic" default="build" basedir=".">
-	<target name="makejar" description="Create a jar for the project">
-		<jar destfile="./target/${ant.project.name}.jar">
-			<fileset dir="bin"></fileset>
-            		<fileset file="plugin.yml"></fileset>
-		</jar>
-	</target>
-</project>
