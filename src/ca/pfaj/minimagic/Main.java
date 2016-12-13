@@ -31,6 +31,7 @@ public class Main extends JavaPlugin
 		
 		Wand.init(this); // register wand object and recipes
 		SpellFireball.init(this, config.getInt("fireball-cost")); // register fireball spell
+                SpellHeal.init(this, config.getInt("heal-cost"), config.getInt("heal-ammount"));
 	}
 	
 	@Override
@@ -39,6 +40,8 @@ public class Main extends JavaPlugin
 	void createConfigDefaults()
 	{
 		config.addDefault("fireball-cost", 15);
+                config.addDefault("heal-cost", 100);
+                config.addDefault("heal-ammount", 3);
 	    config.options().copyDefaults(true);
 	    saveConfig();
 	}
