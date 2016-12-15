@@ -15,7 +15,6 @@ public class Wand
  * Contains info about the wand item.
  */
 // TODO: make enchanted?
-// TODO: durability?
 {
 	public static ItemStack wand_1; // level 1 wand
 	public static final String IDENTIFIER_MAIN = "Wand "; // an item containing this in its lore is a wand
