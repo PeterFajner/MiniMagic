@@ -121,7 +121,6 @@ class FireballListener implements Listener
 	    			plugin.debug("Pew!");
 		            p.launchProjectile(Fireball.class);
 	    		}
-    			plugin.debug("EXP: " + Experience.getExp(p));
 	    	}
 	    }
 	}

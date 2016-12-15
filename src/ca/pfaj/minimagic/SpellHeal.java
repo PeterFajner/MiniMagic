@@ -45,7 +45,7 @@ public class SpellHeal
                 SpellHeal.AMT = ammount;
 		
 		// create heal wand item
-		healWand = new ItemStack(Material.STICK);
+		healWand = Wand.wand_1.clone();
 		ArrayList<String> lore = new ArrayList<String>();
 		lore.add(IDENTIFIER);
 		lore.add("Cost: " + COST);
@@ -59,11 +59,9 @@ public class SpellHeal
 		ShapelessRecipe recipe = new ShapelessRecipe(Wand.wand_1); // create a generic wand as the default
 		recipe.addIngredient(Material.STICK); // the listener will ensure this is a wand
 		recipe.addIngredient(Material.FERMENTED_SPIDER_EYE);
-                recipe.addIngredient(Material.WHEAT);
-                recipe.addIngredient(Material.MILK_BUCKET);
+        recipe.addIngredient(Material.WHEAT);
+        recipe.addIngredient(Material.MILK_BUCKET);
 		server.addRecipe(recipe);
-		
-		// define action
 		
 		// add listener
 		server.getPluginManager().registerEvents(new HealListener(plugin), plugin);
@@ -145,10 +143,6 @@ class HealListener implements Listener
                            //add up heal-amount back to the player
                            p.setHealth(p.getHealth() + (missing_health > SpellHeal.AMT ? SpellHeal.AMT : missing_health));
 	    		}
-	    		else {
-	    			p.sendMessage("Insufficient EXP!");
-	    		}
-    			plugin.debug("EXP: " + Experience.getExp(p));
 	    	}
 	    }
 	}
