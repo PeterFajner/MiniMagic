@@ -10,15 +10,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Main extends JavaPlugin
 {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG;
 	public static PluginLogger logger;
 	
 	FileConfiguration config = getConfig();	
 	public Server server = getServer();
 	
-	public static void debug(String msg)
+	public void debug(String msg)
 	{
-		if (DEBUG) logger.log(Level.INFO, msg);
+		if (config.getBoolean("debug")) logger.log(Level.INFO, msg);
 	}
 	
 	@Override
@@ -31,6 +31,7 @@ public class Main extends JavaPlugin
 		
 		Wand.init(this); // register wand object and recipes
 		SpellFireball.init(this, config.getInt("fireball-cost")); // register fireball spell
+		WaterWalk.init(this, config.getInt("waterwalk-enablecost"), config.getInt("waterwalk-disablecost"), config.getInt("waterwalk-radius"));
 	}
 	
 	@Override
@@ -38,7 +39,11 @@ public class Main extends JavaPlugin
 	
 	void createConfigDefaults()
 	{
+		config.addDefault("debug", true);
 		config.addDefault("fireball-cost", 15);
+		config.addDefault("waterwalk-enablecost", 10);
+		config.addDefault("waterwalk-disablecost", 0);
+		config.addDefault("waterwalk-radius", 3);
 	    config.options().copyDefaults(true);
 	    saveConfig();
 	}
