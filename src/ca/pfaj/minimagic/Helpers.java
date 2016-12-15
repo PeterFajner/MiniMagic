@@ -58,9 +58,9 @@ public class Helpers {
 	public static boolean deductEXP(Player player, int amount)
 	{
 		if (amount < 0) throw new IllegalArgumentException("amount cannot be negative");
-		int xp = player.getLevel();
+		int xp = Experience.getExp(player);
 		if (xp >= amount) {
-			player.setLevel(xp - amount);
+			Experience.changeExp(player, -amount);
 			return true;
 		}
 		else {

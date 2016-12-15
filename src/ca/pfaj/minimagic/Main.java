@@ -43,11 +43,11 @@ public class Main extends JavaPlugin
 	void createConfigDefaults()
 	{
 		config.addDefault("debug", true);
-		config.addDefault("fireball-cost", 2);
-		config.addDefault("waterwalk-enablecost", 3);
+		config.addDefault("fireball-cost", 15);
+		config.addDefault("waterwalk-enablecost", 30);
 		config.addDefault("waterwalk-disablecost", 0);
 		config.addDefault("waterwalk-radius", 3);
-        config.addDefault("heal-cost", 3);
+        config.addDefault("heal-cost", 50);
         config.addDefault("heal-amount", 3);
 	    config.options().copyDefaults(true);
 	    saveConfig();
