@@ -15,7 +15,6 @@ import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.Plugin;
 
 /*
  * Fireball wand, casts a ghast fireball towards the target
@@ -41,13 +40,13 @@ public class SpellFireball
 	public static String IDENTIFIER = "Fireball";
 	public static int COST;
 	
-	public static void init(Plugin plugin, int cost)
+	public static void init(Main plugin, int cost)
 	{
 		Server server = plugin.getServer();
 		SpellFireball.COST = cost;
 		
 		// create fireball wand item
-		fireballWand = new ItemStack(Material.STICK);
+		fireballWand = Wand.wand_1.clone();
 		ArrayList<String> lore = new ArrayList<String>();
 		lore.add(IDENTIFIER);
 		lore.add("Cost: " + COST);
@@ -63,35 +62,42 @@ public class SpellFireball
 		recipe.addIngredient(3, Material.FIREBALL);
 		server.addRecipe(recipe);
 		
-		// define action
-		
 		// add listener
-		server.getPluginManager().registerEvents(new FireballListener(), plugin);
+		server.getPluginManager().registerEvents(new FireballListener(plugin), plugin);
 	}
 }
 
 class FireballListener implements Listener
 {	
+	
+	Main plugin;
+
+	FireballListener(Main plugin)
+	{
+		super();
+		this.plugin = plugin;
+	}
+	
 	@EventHandler
 	public void onItemCrafted(PrepareItemCraftEvent event)
 	/**
 	 * If there is a recipe that creates a wand, and the ingredients are those for a fireball wand, change the result to a fireball wand.
 	 */
 	{
-		Main.debug("Crafting started...");
+		plugin.debug("Crafting started...");
 		CraftingInventory inventory = event.getInventory();
 		ItemStack result = inventory.getResult();
 		if (Helpers.loreContains(result, Wand.IDENTIFIER_MAIN)) { // if a wand is being crafted
-			Main.debug("Crafting wand...");
+			plugin.debug("Crafting wand...");
 			boolean wand_in_ingredients = false; // check if a wand is one of the ingredients
 			int number_of_fire_charges = 0; // check if three fire charges are in the ingredients
 			for (ItemStack ingredient : inventory.getMatrix()) {
 				if (Helpers.loreContains(ingredient, Wand.IDENTIFIER_MAIN)) {
 					wand_in_ingredients = true;
-					Main.debug("Wand in ingredients.");
+					plugin.debug("Wand in ingredients.");
 				}
 				if (ingredient.getData().getItemType() == Material.FIREBALL) {
-					Main.debug("Fire charge in ingredients.");
+					plugin.debug("Fire charge in ingredients.");
 					number_of_fire_charges++;
 				}
 			}
@@ -112,13 +118,10 @@ class FireballListener implements Listener
 	    if (a != Action.PHYSICAL) { // the action is clicking something rather than stepping somewhere
 	    	if (Helpers.loreContains(item, SpellFireball.IDENTIFIER)) { // the item held is a fireball wand
 	    		if (Helpers.deductEXP(p, SpellFireball.COST)) {
-	    			Main.debug("Pew!");
+	    			plugin.debug("Pew!");
 		            p.launchProjectile(Fireball.class);
 	    		}
-	    		else {
-	    			p.sendMessage("Insufficient EXP!");
-	    		}
-    			Main.debug("EXP: " + Experience.getExp(p));
+    			plugin.debug("EXP: " + Experience.getExp(p));
 	    	}
 	    }
 	}
