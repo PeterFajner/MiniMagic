@@ -8,4 +8,8 @@ Fireball wand:
 	
 WaterWalk wand:
 	Shapeless: 1 x Wand, 3 x Ice 
-	Toggles frost walking for any entity.
+	Right click toggles frost walking for any entity.
+	
+Self healing wand:
+	Shapeless: 1 x Wand, 1 x Fermented spider eye, 1 x Wheat, 1 x Milk bucket
+	Heals 1.5 HP.
