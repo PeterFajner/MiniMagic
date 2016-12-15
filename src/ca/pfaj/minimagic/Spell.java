@@ -8,5 +8,14 @@ package ca.pfaj.minimagic;
 
 public class Spell
 {
-	
+	public Spell(SpellProperties properties)
+	{
+		/*
+		 * TODO:
+		 * register ingredients
+		 * register repeating methods
+		 * register click events
+		 * register init and disable
+		 */
+	}
 }
