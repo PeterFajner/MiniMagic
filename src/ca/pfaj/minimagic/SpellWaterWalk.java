@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -38,10 +39,13 @@ public class SpellWaterWalk
 	
 	// on start:
 	//		check all entities for waterwalk metadata and enable repeating event (which is set in their metadata?)
+	//		open waterwalk file, iterate over all entities and enable waterwalking and save to metadata
 	// on cast:
 	//		enable sync event (set a reference to it in metadata)
+	//		write entity id to file
 	// on discast:
 	//		disable syncevent and remove it from metadata
+	//		remove entity id from file
 	// sync event:
 	//		particle effect
 	//		nearby blocks turn into Frosted Ice
@@ -53,6 +57,7 @@ public class SpellWaterWalk
 	public static int enableCost;
 	public static int radius;
 	public static final long EVENT_REPEAT_DELAY = 2L; // delay between particle effects and block checks, in ticks
+	public static Main plugin;
 	
 	public static void init(Main plugin, int enableCost, int disableCost, int radius)
 	{
@@ -60,6 +65,7 @@ public class SpellWaterWalk
 		SpellWaterWalk.enableCost = enableCost;
 		SpellWaterWalk.disableCost = disableCost;
 		SpellWaterWalk.radius = radius;
+		SpellWaterWalk.plugin = plugin;
 		
 		// create waterwalk wand item
 		waterWalkWand = Wand.wand_1.clone();
@@ -84,14 +90,37 @@ public class SpellWaterWalk
 		// sort through all entities and enable the sync event on those with correct metadata
 		List<World> worlds = plugin.getServer().getWorlds();
 		for (World w : worlds) {
-			List<Entity> entities = w.getEntities();
-			for (Entity e : entities) {
-				List<MetadataValue> meta = e.getMetadata(SpellWaterWalk.METADATA_KEY);
-				if (meta == null) { // current not enabled
-					BukkitScheduler scheduler = plugin.getServer().getScheduler();
-			        BukkitTask task = scheduler.runTaskTimer(plugin, new WaterWalkEvent(plugin, e), 0L, EVENT_REPEAT_DELAY);
-			        e.setMetadata(SpellWaterWalk.METADATA_KEY, (MetadataValue) task);
-				}
+			plugin.debug("Checking world " + w);
+			checkEntitiesInWorld(w);
+		}
+		
+		// add an event hook to check for waterwalk entities whenever a world is loaded
+		server.getPluginManager().registerEvents(new Listener() {
+			@EventHandler
+			public void onWorldLoaded(WorldLoadEvent e)
+			{
+				plugin.debug("Checking loaded world " + e.getWorld());
+				checkEntitiesInWorld(e.getWorld());
+			}
+		}, plugin);
+		
+	}
+	
+	/**
+	 * Check if there are any waterwalking entities in a world.
+	 * @param w The world to check.
+	 */
+	static void checkEntitiesInWorld(World w)
+	{
+		List<Entity> entities = w.getEntities();
+		for (Entity e : entities) {
+			List<MetadataValue> meta = e.getMetadata(SpellWaterWalk.METADATA_KEY);
+			if (!(meta == null || (meta != null && meta.size() == 0))) { // waterwalk is flagged as enabled for this entity
+				plugin.debug("Enabling WaterWalk on load...");
+				BukkitScheduler scheduler = plugin.getServer().getScheduler();
+		        BukkitTask task = scheduler.runTaskTimer(plugin, new WaterWalkEvent(plugin, e), 0L, SpellWaterWalk.EVENT_REPEAT_DELAY);
+		        FixedMetadataValue val = new FixedMetadataValue(plugin, task);
+		        e.setMetadata(SpellWaterWalk.METADATA_KEY, val);
 			}
 		}
 	}
@@ -150,7 +179,7 @@ class WaterWalkListener implements Listener
 			if (!(ent instanceof Player)) { // can't be cast on players
 				plugin.debug("Entity valid...");
 				List<MetadataValue> meta = ent.getMetadata(SpellWaterWalk.METADATA_KEY);
-				if (meta == null || (meta != null && meta.size() == 0)) { // current not enabled
+				if (meta == null || (meta != null && meta.size() == 0)) { // currently not enabled
 					plugin.debug("Enabling WaterWalk...");
 					BukkitScheduler scheduler = plugin.getServer().getScheduler();
 			        BukkitTask task = scheduler.runTaskTimer(plugin, new WaterWalkEvent(plugin, ent), 0L, SpellWaterWalk.EVENT_REPEAT_DELAY);
