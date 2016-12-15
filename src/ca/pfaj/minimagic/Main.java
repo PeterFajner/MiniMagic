@@ -30,6 +30,7 @@ public class Main extends JavaPlugin
 		debug("Debug printing enabled.");
 		
 		Wand.init(this); // register wand object and recipes
+		Helpers.init(this);
 		SpellFireball.init(this, config.getInt("fireball-cost")); // register fireball spell
 		SpellWaterWalk.init(this, config.getInt("waterwalk-enablecost"), config.getInt("waterwalk-disablecost"), config.getInt("waterwalk-radius"));
         SpellHeal.init(this, config.getInt("heal-cost"), config.getInt("heal-amount"));
@@ -39,7 +40,7 @@ public class Main extends JavaPlugin
 	public void onDisable() {
 		SpellWaterWalk.close();
 	}
-	
+	 
 	void createConfigDefaults()
 	{
 		config.addDefault("debug", true);
