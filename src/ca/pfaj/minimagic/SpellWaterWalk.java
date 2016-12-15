@@ -30,7 +30,7 @@ import org.bukkit.scheduler.BukkitTask;
  * @author peter
  *
  */
-public class WaterWalk
+public class SpellWaterWalk
 {
 	// make spell castable on LivingEntity except humans
 	// repeating event every tick or so, freeze nearby blocks
@@ -57,9 +57,9 @@ public class WaterWalk
 	public static void init(Main plugin, int enableCost, int disableCost, int radius)
 	{
 		Server server = plugin.getServer();
-		WaterWalk.enableCost = enableCost;
-		WaterWalk.disableCost = disableCost;
-		WaterWalk.radius = radius;
+		SpellWaterWalk.enableCost = enableCost;
+		SpellWaterWalk.disableCost = disableCost;
+		SpellWaterWalk.radius = radius;
 		
 		// create waterwalk wand item
 		waterWalkWand = Wand.wand_1.clone();
@@ -86,11 +86,11 @@ public class WaterWalk
 		for (World w : worlds) {
 			List<Entity> entities = w.getEntities();
 			for (Entity e : entities) {
-				List<MetadataValue> meta = e.getMetadata(WaterWalk.METADATA_KEY);
+				List<MetadataValue> meta = e.getMetadata(SpellWaterWalk.METADATA_KEY);
 				if (meta == null) { // current not enabled
 					BukkitScheduler scheduler = plugin.getServer().getScheduler();
 			        BukkitTask task = scheduler.runTaskTimer(plugin, new WaterWalkEvent(plugin, e), 0L, EVENT_REPEAT_DELAY);
-			        e.setMetadata(WaterWalk.METADATA_KEY, (MetadataValue) task);
+			        e.setMetadata(SpellWaterWalk.METADATA_KEY, (MetadataValue) task);
 				}
 			}
 		}
@@ -129,7 +129,7 @@ class WaterWalkListener implements Listener
 				}
 			}
 			if (wand_in_ingredients && number_of_ice_blocks == 3) {
-				inventory.setResult(WaterWalk.waterWalkWand);
+				inventory.setResult(SpellWaterWalk.waterWalkWand);
 			}
 		}
 	}
@@ -145,23 +145,23 @@ class WaterWalkListener implements Listener
 		if (e.getHand().equals(EquipmentSlot.OFF_HAND)) return; // when clicking on a horse the off hand event isn't fired; at other times both events are fired, so we ignore the off hand event 
 	    ItemStack mainHand = p.getInventory().getItemInMainHand();
 	    ItemStack offHand = p.getInventory().getItemInOffHand();
-		if (Helpers.loreContains(mainHand, WaterWalk.IDENTIFIER) || Helpers.loreContains(offHand, WaterWalk.IDENTIFIER)) { // holding the waterwalk wand
+		if (Helpers.loreContains(mainHand, SpellWaterWalk.IDENTIFIER) || Helpers.loreContains(offHand, SpellWaterWalk.IDENTIFIER)) { // holding the waterwalk wand
 			plugin.debug("Casting WaterWalk...");
 			if (!(ent instanceof Player)) { // can't be cast on players
 				plugin.debug("Entity valid...");
-				List<MetadataValue> meta = ent.getMetadata(WaterWalk.METADATA_KEY);
+				List<MetadataValue> meta = ent.getMetadata(SpellWaterWalk.METADATA_KEY);
 				if (meta == null || (meta != null && meta.size() == 0)) { // current not enabled
 					plugin.debug("Enabling WaterWalk...");
 					BukkitScheduler scheduler = plugin.getServer().getScheduler();
-			        BukkitTask task = scheduler.runTaskTimer(plugin, new WaterWalkEvent(plugin, ent), 0L, WaterWalk.EVENT_REPEAT_DELAY);
+			        BukkitTask task = scheduler.runTaskTimer(plugin, new WaterWalkEvent(plugin, ent), 0L, SpellWaterWalk.EVENT_REPEAT_DELAY);
 			        FixedMetadataValue val = new FixedMetadataValue(plugin, task);
-			        ent.setMetadata(WaterWalk.METADATA_KEY, val);
+			        ent.setMetadata(SpellWaterWalk.METADATA_KEY, val);
 				}
 				else { // currently enabled
 					plugin.debug("Disabling WaterWalk...");
 					BukkitTask task = (BukkitTask) meta.get(0).value();
 					task.cancel();
-					ent.removeMetadata(WaterWalk.METADATA_KEY, plugin);
+					ent.removeMetadata(SpellWaterWalk.METADATA_KEY, plugin);
 				}
 			}
 		}
@@ -179,7 +179,7 @@ class WaterWalkEvent implements Runnable
 {
 	Main plugin;
 	Entity e;
-	int r = WaterWalk.radius;
+	int r = SpellWaterWalk.radius;
 	
 	WaterWalkEvent(Main plugin, Entity e)
 	{

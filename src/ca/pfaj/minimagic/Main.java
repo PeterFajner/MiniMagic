@@ -31,7 +31,8 @@ public class Main extends JavaPlugin
 		
 		Wand.init(this); // register wand object and recipes
 		SpellFireball.init(this, config.getInt("fireball-cost")); // register fireball spell
-		WaterWalk.init(this, config.getInt("waterwalk-enablecost"), config.getInt("waterwalk-disablecost"), config.getInt("waterwalk-radius"));
+		SpellWaterWalk.init(this, config.getInt("waterwalk-enablecost"), config.getInt("waterwalk-disablecost"), config.getInt("waterwalk-radius"));
+        SpellHeal.init(this, config.getInt("heal-cost"), config.getInt("heal-amount"));
 	}
 	
 	@Override
@@ -44,6 +45,8 @@ public class Main extends JavaPlugin
 		config.addDefault("waterwalk-enablecost", 10);
 		config.addDefault("waterwalk-disablecost", 0);
 		config.addDefault("waterwalk-radius", 3);
+        config.addDefault("heal-cost", 100);
+        config.addDefault("heal-amount", 3);
 	    config.options().copyDefaults(true);
 	    saveConfig();
 	}
