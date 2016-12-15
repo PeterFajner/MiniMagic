@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -32,6 +33,7 @@ public class Wand
 		ItemMeta wandMeta = wand_1.getItemMeta();
 		wandMeta.setLore(lore);
 		wandMeta.setDisplayName("Wand");
+		wandMeta.addEnchant(Enchantment.DURABILITY, 1, true);
 		wand_1.setItemMeta(wandMeta);
 		
 		// create wand recipe
