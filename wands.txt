@@ -1,0 +1,11 @@
+Wand:
+	Shapeless 1 x Stick, 1 x Diamond, 2 x XP bottle
+	A generic wand, used to craft other wands.
+
+Fireball wand:
+	Shapeless: 1 x Wand, 3 x Fire charge
+	Casts a ghast fireball when left or right clicked.
+	
+WaterWalk wand:
+	Shapeless: 1 x Wand, 3 x Ice 
+	Toggles frost walking for any entity.
