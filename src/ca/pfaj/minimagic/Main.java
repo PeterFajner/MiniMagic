@@ -36,7 +36,9 @@ public class Main extends JavaPlugin
 	}
 	
 	@Override
-	public void onDisable() {}
+	public void onDisable() {
+		SpellWaterWalk.close();
+	}
 	
 	void createConfigDefaults()
 	{

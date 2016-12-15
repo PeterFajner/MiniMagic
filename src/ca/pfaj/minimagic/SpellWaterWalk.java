@@ -1,5 +1,12 @@
 package ca.pfaj.minimagic;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +22,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
 
 /**
  * A wand that allows a nonhuman LivingEntity to walk on water when rightclicked, and disables this effect when leftclicked.
@@ -38,26 +40,27 @@ public class SpellWaterWalk
 	// rightclick to enable, leftclick to disable
 	
 	// on start:
-	//		check all entities for waterwalk metadata and enable repeating event (which is set in their metadata?)
-	//		open waterwalk file, iterate over all entities and enable waterwalking and save to metadata
+	//		open waterwalk file, iterate over all entities and enable waterwalking for those with relevant IDs
 	// on cast:
-	//		enable sync event (set a reference to it in metadata)
+	//		enable sync event
 	//		write entity id to file
 	// on discast:
-	//		disable syncevent and remove it from metadata
+	//		disable syncevent
 	//		remove entity id from file
 	// sync event:
 	//		particle effect
-	//		nearby blocks turn into Frosted Ice
 	
 	public static ItemStack waterWalkWand;
+	public static Main plugin;
 	public static final String IDENTIFIER = "WaterWalk";
 	public static final String METADATA_KEY = "WaterWalk";
+	public static final long EVENT_REPEAT_DELAY = 2L; // delay between particle effects and block checks, in ticks
+	public static File waterwalkers_file;
 	public static int disableCost;
 	public static int enableCost;
 	public static int radius;
-	public static final long EVENT_REPEAT_DELAY = 2L; // delay between particle effects and block checks, in ticks
-	public static Main plugin;
+	public static List<Integer> waterWalkingEntities;
+	static long ENTITY_LIST_FILE_SAVE_DELAY = 60L; // the list of entities is saved every this many ticks  
 	
 	public static void init(Main plugin, int enableCost, int disableCost, int radius)
 	{
@@ -66,6 +69,8 @@ public class SpellWaterWalk
 		SpellWaterWalk.disableCost = disableCost;
 		SpellWaterWalk.radius = radius;
 		SpellWaterWalk.plugin = plugin;
+		
+		createIDList(); // create file to hold IDs of waterwalk-enabled entities
 		
 		// create waterwalk wand item
 		waterWalkWand = Wand.wand_1.clone();
@@ -86,42 +91,96 @@ public class SpellWaterWalk
 		
 		// add listener
 		server.getPluginManager().registerEvents(new WaterWalkListener(plugin), plugin);
+	}
 	
-		// sort through all entities and enable the sync event on those with correct metadata
-		List<World> worlds = plugin.getServer().getWorlds();
-		for (World w : worlds) {
-			plugin.debug("Checking world " + w);
-			checkEntitiesInWorld(w);
+	public static void close()
+	{
+		writeIdsToFile();
+	}
+		
+	
+	/**
+	 * Loads the list of waterwalking entities from file and creates a task to periodically save them to the file.
+	 */
+	static void createIDList()
+	{
+		// make sure the file exists
+		SpellWaterWalk.waterwalkers_file = new File(plugin.getDataFolder(), "waterwalkers.yml");
+		if (!waterwalkers_file.exists()) {
+			waterwalkers_file.getParentFile().mkdirs();
+			try {
+				waterwalkers_file.createNewFile();
+			} catch (IOException e) { e.printStackTrace(); }
 		}
 		
-		// add an event hook to check for waterwalk entities whenever a world is loaded
-		server.getPluginManager().registerEvents(new Listener() {
-			@EventHandler
-			public void onWorldLoaded(WorldLoadEvent e)
-			{
-				plugin.debug("Checking loaded world " + e.getWorld());
-				checkEntitiesInWorld(e.getWorld());
-			}
-		}, plugin);
+		// make sure the ID list is empty
+		waterWalkingEntities = new ArrayList<Integer>();
 		
+		// load IDs
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(waterwalkers_file));  
+			String line = null;  
+			while ((line = br.readLine()) != null)  
+			{  
+				waterWalkingEntities.add(Integer.parseInt(line));
+			} 
+			br.close();
+		}
+		catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		
+		// task to write IDs to the file
+		plugin.getServer().getScheduler().runTaskTimer(plugin, new Runnable() {
+			@Override
+			public void run() 
+			{
+				writeIdsToFile();
+			}
+		}, 0L, ENTITY_LIST_FILE_SAVE_DELAY);
+		
+		// task to cause the waterwalking effect
+		plugin.getServer().getScheduler().runTaskTimer(plugin, new WaterWalkEvent(plugin), 100L, SpellWaterWalk.EVENT_REPEAT_DELAY);
+	}
+	
+	static void writeIdsToFile()
+	{
+		try {
+			FileOutputStream fos = new FileOutputStream(waterwalkers_file, false);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+			for (Integer id : waterWalkingEntities) {
+				bw.write(Integer.toString(id));
+				bw.newLine();
+			} 
+			bw.close();
+			fos.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
-	 * Check if there are any waterwalking entities in a world.
-	 * @param w The world to check.
+	 * Checks if an entity is marked as waterwalking.
+	 * @param e The entity to check
+	 * @return
 	 */
-	static void checkEntitiesInWorld(World w)
+	static boolean isWaterWalking(Entity e)
 	{
-		List<Entity> entities = w.getEntities();
-		for (Entity e : entities) {
-			List<MetadataValue> meta = e.getMetadata(SpellWaterWalk.METADATA_KEY);
-			if (!(meta == null || (meta != null && meta.size() == 0))) { // waterwalk is flagged as enabled for this entity
-				plugin.debug("Enabling WaterWalk on load...");
-				BukkitScheduler scheduler = plugin.getServer().getScheduler();
-		        BukkitTask task = scheduler.runTaskTimer(plugin, new WaterWalkEvent(plugin, e), 0L, SpellWaterWalk.EVENT_REPEAT_DELAY);
-		        FixedMetadataValue val = new FixedMetadataValue(plugin, task);
-		        e.setMetadata(SpellWaterWalk.METADATA_KEY, val);
-			}
+		int id = e.getEntityId();
+		for (Integer i : waterWalkingEntities) {
+			if (i.intValue() == id) return true;
+		}
+		return false;
+	}
+	
+	static void setWaterWalking(Entity e, boolean waterWalking)
+	{
+		if (waterWalking == true) {
+			waterWalkingEntities.add(new Integer(e.getEntityId()));
+		}
+		else {
+			waterWalkingEntities.remove(new Integer(e.getEntityId()));
 		}
 	}
 }
@@ -178,19 +237,13 @@ class WaterWalkListener implements Listener
 			plugin.debug("Casting WaterWalk...");
 			if (!(ent instanceof Player)) { // can't be cast on players
 				plugin.debug("Entity valid...");
-				List<MetadataValue> meta = ent.getMetadata(SpellWaterWalk.METADATA_KEY);
-				if (meta == null || (meta != null && meta.size() == 0)) { // currently not enabled
-					plugin.debug("Enabling WaterWalk...");
-					BukkitScheduler scheduler = plugin.getServer().getScheduler();
-			        BukkitTask task = scheduler.runTaskTimer(plugin, new WaterWalkEvent(plugin, ent), 0L, SpellWaterWalk.EVENT_REPEAT_DELAY);
-			        FixedMetadataValue val = new FixedMetadataValue(plugin, task);
-			        ent.setMetadata(SpellWaterWalk.METADATA_KEY, val);
+				if (SpellWaterWalk.isWaterWalking(ent)) { // currently enabled
+					plugin.debug("Disabling WaterWalk...");
+			        SpellWaterWalk.setWaterWalking(ent, false);
 				}
 				else { // currently enabled
-					plugin.debug("Disabling WaterWalk...");
-					BukkitTask task = (BukkitTask) meta.get(0).value();
-					task.cancel();
-					ent.removeMetadata(SpellWaterWalk.METADATA_KEY, plugin);
+					plugin.debug("Enabling WaterWalk...");
+					SpellWaterWalk.setWaterWalking(ent, true);
 				}
 			}
 		}
@@ -207,35 +260,48 @@ class WaterWalkListener implements Listener
 class WaterWalkEvent implements Runnable
 {
 	Main plugin;
-	Entity e;
 	int r = SpellWaterWalk.radius;
 	
-	WaterWalkEvent(Main plugin, Entity e)
+	WaterWalkEvent(Main plugin)
 	{
 		this.plugin = plugin;
-		this.e = e;
+	}
+	
+	void createEffect(Entity e)
+	{
+		// convert nearby water to frosted ice
+				Location loc = e.getLocation();
+				World world = loc.getWorld();
+				int x = loc.getBlockX();
+				int y = loc.getBlockY();
+				int z = loc.getBlockZ();
+				for (int u=x-r; u<=x+r; u++) {
+					for (int v=y-r; v<=y+r; v++) {
+						for (int w=z-r; w<=z+r; w++) {
+							Block block = world.getBlockAt(u,v,w);
+							if (block.getType() == Material.STATIONARY_WATER) {
+								block.setType(Material.FROSTED_ICE);
+							}
+						}
+					}
+				}
+				
+				// spawn particle
+				world.spawnParticle(Particle.WATER_SPLASH, x, y, z, 5);
 	}
 
 	@Override
 	public void run() {
-		// convert nearby water to frosted ice
-		Location loc = e.getLocation();
-		World world = loc.getWorld();
-		int x = loc.getBlockX();
-		int y = loc.getBlockY();
-		int z = loc.getBlockZ();
-		for (int u=x-r; u<=x+r; u++) {
-			for (int v=y-r; v<=y+r; v++) {
-				for (int w=z-r; w<=z+r; w++) {
-					Block block = world.getBlockAt(u,v,w);
-					if (block.getType() == Material.STATIONARY_WATER) {
-						block.setType(Material.FROSTED_ICE);
+		for (World w : plugin.server.getWorlds()) {
+			for (Entity entity : w.getEntities()) {
+				int entityId = entity.getEntityId();
+				for (Integer id : SpellWaterWalk.waterWalkingEntities) {
+					if (id.intValue() == entityId) {
+						createEffect(entity);
 					}
 				}
 			}
 		}
 		
-		// spawn particle
-		world.spawnParticle(Particle.WATER_SPLASH, x, y, z, 5);
 	}
 }
